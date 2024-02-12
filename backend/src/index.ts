@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
+import datasource from "./lib/datasource";
+import BookService from "./services/book.service";
 
 type Book = {
   title: string;
@@ -26,6 +28,7 @@ const books: Book[] = [
 
 const typeDefs = `#graphql
   type Book {
+    id: String
     title: String
     author: String
   }
@@ -41,26 +44,25 @@ const typeDefs = `#graphql
   }
 
   type Mutation {
-    addBook(infos: AddBookInput): [Book]
+    addBook(infos: AddBookInput): Book
   }
 `;
 
 const resolvers = {
   Query: {
-    books: (): Book[] => books,
-    findBookByTitle: (_: null, { title }: FindBookArgs) => {
-      const book = books.find((b) => b.title === title);
-      if (!book) {
-        throw new Error("Le livre n'existe pas");
-      }
+    books: async (): Promise<Book[]> => {
+      const listBooks = await new BookService().listBooks();
+      return listBooks;
+    },
+    findBookByTitle: async (_: null, { title }: FindBookArgs) => {
+      const book = await new BookService().findBookByTitle(title);
       return book;
     }, //UMD
   },
   Mutation: {
-    addBook: (_: null, { infos }: AddBookArgs) => {
-      console.log("INFOS", infos);
-      books.push(infos);
-      return books;
+    addBook: async (_: null, { infos }: AddBookArgs) => {
+      const bookCreated = await new BookService().addBook(infos);
+      return bookCreated;
     },
   },
 };
@@ -71,6 +73,7 @@ const server = new ApolloServer({
 });
 
 async function main() {
+  await datasource.initialize();
   const { url } = await startStandaloneServer(server, {
     listen: { port: 4006 },
     // context: ({req, res}) => {

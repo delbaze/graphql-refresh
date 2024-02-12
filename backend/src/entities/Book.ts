@@ -2,16 +2,15 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 class Book {
-    @PrimaryGeneratedColumn("uuid")
-    id: string;
 
-    @Column()
-    title: string;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-    @Column()
-    author: string;
+  @Column()
+  title: string;
 
+  @Column()
+  author: string;
 }
 
-
-export default Book
+export default Book;
