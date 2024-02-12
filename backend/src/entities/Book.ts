@@ -1,4 +1,4 @@
-import { Field, ObjectType } from "type-graphql";
+import { Field, InputType, ObjectType } from "type-graphql";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -16,6 +16,16 @@ class Book {
   @Column()
   @Field()
   author: string;
+}
+
+@InputType()
+export class AddBookInput {
+    @Field()
+    title: string
+
+    @Field()
+    author: string
+
 }
 
 export default Book;
