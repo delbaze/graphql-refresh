@@ -3,6 +3,8 @@ import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import datasource from "./lib/datasource";
 import BookService from "./services/book.service";
+import { buildSchema } from "type-graphql";
+import BookResolver from "./resolvers/book.resolver";
 
 type Book = {
   title: string;
@@ -14,17 +16,6 @@ type FindBookArgs = {
 };
 
 type AddBookArgs = { infos: { title: string; author: string } };
-
-const books: Book[] = [
-  {
-    title: "The Awakening",
-    author: "Kate Chopin",
-  },
-  {
-    title: "City of Glass",
-    author: "Paul Auster",
-  },
-];
 
 const typeDefs = `#graphql
   type Book {
@@ -67,12 +58,15 @@ const resolvers = {
   },
 };
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-});
-
 async function main() {
+  const schema = await buildSchema({
+    resolvers: [BookResolver],
+  });
+  const server = new ApolloServer({
+    // typeDefs,
+    // resolvers,
+    schema
+  });
   await datasource.initialize();
   const { url } = await startStandaloneServer(server, {
     listen: { port: 4006 },
