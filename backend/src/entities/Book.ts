@@ -28,4 +28,16 @@ export class AddBookInput {
 
 }
 
+@InputType()
+export class UpdateBookInput {
+    @Field({nullable: true})
+    title?: string
+
+    @Field({nullable: true})
+    author?: string
+
+    @Field()
+    id: string
+}
+
 export default Book;

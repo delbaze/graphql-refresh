@@ -1,5 +1,5 @@
 import { Repository } from "typeorm";
-import Book from "../entities/Book";
+import Book, { AddBookInput, UpdateBookInput } from "../entities/Book";
 import datasource from "../lib/datasource";
 
 export default class BookService {
@@ -21,9 +21,28 @@ export default class BookService {
     // return await this.db.findOne({ where: { title } });
   }
 
-  async addBook({ title, author }: Omit<Book, "id">) {
+  async addBook({ title, author }: AddBookInput) {
     const book = this.db.create({ title, author });
     return await this.db.save(book);
     // return await this.db.save({title, author})
+  }
+
+  async findBookById(id: string) {
+    const book = await this.db.findOneBy({ id });
+    if (!book) {
+      throw new Error("Le livre n'existe pas");
+    }
+    return book;
+  }
+  async deleteBook(id: string) {
+    const book = await this.findBookById(id);
+
+    await this.db.delete(book);
+    return book;
+  }
+
+  async updateBook({ id, author, title }: UpdateBookInput) {
+    const book = await this.findBookById(id);
+    return await this.db.save(this.db.merge(book, { author, title }));
   }
 }
